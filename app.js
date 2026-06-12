@@ -21,30 +21,34 @@ const supabase = createClient(
   process.env.SUPABASE_KEY,
 );
 
-async function cadastrarCliente() {
-  console.log("Cadastro de clientes!");
-  let nome = prompt(" Digite seu nome: ");
-  let cpf = prompt(" Digite seu CPF: ");
-  let telefone = prompt(" Digite seu número de telefone: ");
-  let endereco = prompt(" Digite seu endereço: ");
-  let senha = prompt(" Digite sua senha: ");
+// async function cadastrarCliente() {
+//   console.log("Cadastro de clientes!");
+//   let nome = prompt(" Digite seu nome: ");
+//   let cpf = prompt(" Digite seu CPF: ");
+//   let email = prompt(" Digite o email: ")
+//   let telefone = prompt(" Digite seu número de telefone: ");
+//   let dataCadastro = prompt(" Data de cadastro: ")
+//   let endereco = prompt(" Digite seu endereço: ");
+//   let senha = prompt(" Digite sua senha: ");
 
-  let cadastrarCliente = {
-    nome: nome,
-    cpf: cpf,
-    telefone: telefone,
-    endereco: endereco,
-    senha: senha,
-  };
-  const { data, error } = await supabase
-    .from("banco_clientes") // banco clientes
-    .insert(cadastrarCliente)
-    .select();
-    
-    console.log(data)
-    console.log(error)
-}
-cadastrarCliente(); // chama a função de cadastro
+//   let cadastrarCliente = {
+//     nome: nome,
+//     cpf: cpf,
+//     email: email,
+//     telefone: telefone,
+//     dataCadastro: dataCadastro,
+//     endereco: endereco,
+//     senha: senha,
+//   };
+//   const { data, error } = await supabase
+//     .from("banco_clientes") // banco clientes
+//     .insert(cadastrarCliente)
+//     .select();
+
+//     console.log(data)
+//     console.log(error)
+// }
+// cadastrarCliente(); // chama a função de cadastro
 
 // async function listarCliente() {
 //   console.log("Lista de clientes!");
@@ -117,35 +121,37 @@ cadastrarCliente(); // chama a função de cadastro
 
 // async function cadastrarConta() {
 //   console.log("Cadastro de contas!");
-//     let nome = prompt('Digite seu nome:')
-//     let cpf = prompt(" Digite seu CPF: ");
-//     let telefone = prompt(" Digite seu número de telefone: ");
-//     let endereco = prompt(" Digite seu endereço: ");
-//     let senha = prompt(" Digite sua senha: ");
+//   let nome = prompt("Digite seu nome:");
+//   let cpf = prompt(" Digite seu CPF: ");
+//   let telefone = prompt(" Digite seu número de telefone: ");
+//   let endereco = prompt(" Digite seu endereço: ");
+//   let senha = prompt(" Digite sua senha: ");
 
-//     let cadastrarConta = {
-//         nome : nome,
-//         cpf: cpf,
-//         telefone: telefone,
-//         endereco: endereco,
-//         senha: senha,
-//     }
+//   let cadastrarConta = {
+//     nome: nome,
+//     cpf: cpf,
+//     telefone: telefone,
+//     endereco: endereco,
+//     senha: senha,
+//   };
 
-// const { data, error } = await supabase.from('banco_contas').select()
-
+//   const { data, error } = await supabase.from("banco_contas").insert();
+//   if (error) {
+//     console.log(error);
+//   }
 // }
 // cadastrarConta();
 
-// async function listarContas() {
-//   console.log("Lista de contas!");
-//      const { data, error } = await supabase
-//     .from("banco_contas") // lista do banco contas
-//     .select("agência, tipo_da_conta");
+async function listarContas() {
+  console.log("Lista de contas!");
+  const { data, error } = await supabase
+    .from("banco_contas") // lista do banco contas
+    .select("agência, tipo_da_conta");
 
-//   data.forEach((dados) => {
-//     console.log(
-//       `agência: ${dados.agencia}, tipo da conta: ${dados.tipo_da_conta}, `,
-//     );
-//   });
-// }
-// listarContas();
+  data.forEach((dados) => {
+    console.log(
+      `agência: ${dados.agencia}, tipo da conta: ${dados.tipo_da_conta}, `,
+    );
+  });
+}
+listarContas();
