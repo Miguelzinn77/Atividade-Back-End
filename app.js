@@ -1,7 +1,7 @@
 // npm init -y
 // npm install dotenv
 // npm install prompt-sync
-//npm install @supabase/supabase-js
+// npm install @supabase/supabase-js
 // npm install bcrypt - para criptografar as senhas
 
 // REQUISITOS DA ATIVIDADE BACK-END
@@ -15,6 +15,7 @@
 const prompt = require("prompt-sync")();
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
+const bcrypt = require("bcrypt");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -29,7 +30,49 @@ async function cadastrarCliente() {
   let endereco = prompt(" Digite seu endereço: ");
   let senha = prompt(" Digite sua senha: ");
 
+  let saltRounds = 7; // número de rounds para gerar o salt, quanto maior, mais seguro, mas também mais lento
+  let senhaCrip = await bcrypt.hash(senha, saltRounds); // criptografa a senha usando bcrypt
+
   let cadastrarCliente = {
+    nome: nome,
+    cpf: cpf,
+    telefone: telefone,
+    endereco: endereco,
+    senha: senhaCrip,
+  };
+  const { data, error } = await supabase
+    .from("banco_clientes") // banco clientes
+    .insert(cadastrarCliente)
+    .select();
+
+  console.log(data);
+  console.log(error);
+}
+// cadastrarCliente(); // chama a função de cadastro
+
+async function listarCliente() {
+  console.log("Lista de clientes!");
+  const { data, error } = await supabase
+    .from("banco_clientes") // lista do banco clientes
+    .select("nome, cpf, endereco");
+
+  data.forEach((dados) => {
+    console.log(
+      `nome: ${dados.nome}, cpf: ${dados.cpf}, endereco: ${dados.endereco}`,
+    );
+  });
+}
+// listarCliente(); // chama a função listar dados
+
+async function buscarClientes(id) {
+  console.log("Busca de clientes!");
+  let nome = prompt(" Digite seu nome: ");
+  let cpf = prompt(" Digite seu CPF: ");
+  let telefone = prompt(" Digite seu número de telefone: ");
+  let endereco = prompt(" Digite seu endereço: ");
+  let senha = prompt(" Digite sua senha: ");
+
+  let buscarClientes = {
     nome: nome,
     cpf: cpf,
     telefone: telefone,
@@ -37,115 +80,186 @@ async function cadastrarCliente() {
     senha: senha,
   };
   const { data, error } = await supabase
-    .from("banco_clientes") // banco clientes
-    .insert(cadastrarCliente)
+    .from("banco_clientes") // busca no banco clientes
+    .update(buscarClientes)
+    .eq("id", id)
     .select();
-    
-    console.log(data)
-    console.log(error)
+  if (error) {
+    console.log(error);
+  }
+  data.forEach((id) => {
+    console.log(
+      `nome: ${id.nome}, cpf: ${id.cpf}, telefone: ${id.telefone}, endereco: ${id.endereco}, senha: ${id.senha}`,
+    );
+  });
 }
-cadastrarCliente(); // chama a função de cadastro
-
-// async function listarCliente() {
-//   console.log("Lista de clientes!");
-//   const { data, error } = await supabase
-//     .from("banco_clientes") // lista do banco clientes
-//     .select("nome, cpf, endereco");
-
-//   data.forEach((dados) => {
-//     console.log(
-//       `nome: ${dados.nome}, cpf: ${dados.cpf}, endereco: ${dados.endereco}`,
-//     );
-//   });
-// }
-// listarCliente(); // chama a função listar dados
-
-// async function buscarClientes(id) {
-//   console.log("Busca de clientes!");
-//   let nome = prompt(" Digite seu nome: ");
-//   let cpf = prompt(" Digite seu CPF: ");
-//   let telefone = prompt(" Digite seu número de telefone: ");
-//   let endereco = prompt(" Digite seu endereço: ");
-//   let senha = prompt(" Digite sua senha: ");
-
-//   let buscarClientes = {
-//     nome: nome,
-//     cpf: cpf,
-//     telefone: telefone,
-//     endereco: endereco,
-//     senha: senha,
-//   };
-//   const { data, error } = await supabase
-//     .from("banco_clientes") // busca no banco clientes
-//     .update(buscarClientes)
-//     .eq("id", id).select();
-//   if (error) {
-//     console.log(error);
-//   }
-//   data.forEach((id) => {
-//     console.log(
-//       `nome: ${id.nome}, cpf: ${id.cpf}, telefone: ${id.telefone}, endereco: ${id.endereco}, senha: ${id.senha}`,
-//     );
-//   });
-// }
 // buscarClientes();
 
-// async function deletarCliente(id) {
-//   console.log("Deletar cliente!");
-//   let nome = prompt(" Digite seu nome: ");
-//   let cpf = prompt(" Digite seu CPF: ");
-//   let telefone = prompt(" Digite seu número de telefone: ");
-//   let endereco = prompt(" Digite seu endereço: ");
-//   let senha = prompt(" Digite sua senha: ");
+async function deletarCliente(id) {
+  console.log("Deletar cliente!");
+  let nome = prompt(" Digite seu nome: ");
+  let cpf = prompt(" Digite seu CPF: ");
+  let telefone = prompt(" Digite seu número de telefone: ");
+  let endereco = prompt(" Digite seu endereço: ");
+  let senha = prompt(" Digite sua senha: ");
 
-//   let deletarCliente = {
-//     nome: nome,
-//     cpf: cpf,
-//     telefone: telefone,
-//     endereco: endereco,
-//     senha: senha,
-//   };
-//   const { data, error } = await supabase
-//     .from("banco_clientes")
-//     .delete(deletarCliente)
-//     .eq("id", id).select();
-//   if (error) {
-//     console.log(error);
-//   }
-// }
+  let deletarCliente = {
+    nome: nome,
+    cpf: cpf,
+    telefone: telefone,
+    endereco: endereco,
+    senha: senha,
+  };
+  const { data, error } = await supabase
+    .from("banco_clientes")
+    .delete(deletarCliente)
+    .eq("id", id)
+    .select();
+  if (error) {
+    console.log(error);
+  }
+}
 // deletarCliente();
 
-// async function cadastrarConta() {
-//   console.log("Cadastro de contas!");
-//     let nome = prompt('Digite seu nome:')
-//     let cpf = prompt(" Digite seu CPF: ");
-//     let telefone = prompt(" Digite seu número de telefone: ");
-//     let endereco = prompt(" Digite seu endereço: ");
-//     let senha = prompt(" Digite sua senha: ");
+async function cadastrarConta() {
+  console.log("Cadastro de contas!");
+  let numeroDaConta = prompt("Digite o número da conta:");
+  let agencia = prompt(" Digite o número da agência: ");
+  let tipoDaConta = prompt(" Digite o tipo da conta: ");
+  let dataAbertura = prompt(" Digite a data de abertura: ");
+  let saldoInicial = prompt(" Digite o saldo inicial: ");
 
-//     let cadastrarConta = {
-//         nome : nome,
-//         cpf: cpf,
-//         telefone: telefone,
-//         endereco: endereco,
-//         senha: senha,
-//     }
+  let cadastrarConta = {
+    numero_da_conta: numeroDaConta,
+    agencia: agencia,
+    tipoDaConta: tipoDaConta,
+    dataAbertura: dataAbertura,
+    saldoInicial: saldoInicial,
+  };
 
-// const { data, error } = await supabase.from('banco_contas').select()
+  const { data, error } = await supabase
+    .from("banco_contas")
+    .insert(cadastrarConta)
+    .select();
 
-// }
+  console.log(error);
+  console.log(data);
+}
 // cadastrarConta();
 
-// async function listarContas() {
-//   console.log("Lista de contas!");
-//      const { data, error } = await supabase
-//     .from("banco_contas") // lista do banco contas
-//     .select("agência, tipo_da_conta");
+async function listarContas() {
+  console.log("Lista de contas!");
+  const { data, error } = await supabase
+    .from("banco_contas") // lista do banco contas
+    .select("agência, tipo_da_conta")
+    .eq("id", id);
 
-//   data.forEach((dados) => {
-//     console.log(
-//       `agência: ${dados.agencia}, tipo da conta: ${dados.tipo_da_conta}, `,
-//     );
-//   });
-// }
+  data.forEach((dados) => {
+    console.log(
+      `agência: ${dados.agencia}, tipo da conta: ${dados.tipoDaConta}, saldo: ${dados.saldoInicial}`,
+    );
+  });
+  if (error) {
+    console.log(error);
+  }
+  console.log(data);
+}
 // listarContas();
+
+async function registrarTransacao() {
+  console.log("Registrar transação!");
+
+  const { data, error } = await supabase
+    .from("banco_transacoes")
+    .select("tipo_da_transacao, valor_da_transacao")
+    .eq("id", id);
+
+  if (error) {
+    console.log(error);
+  }
+}
+// registrarTransacao();
+
+async function listarTransacoes() {
+  console.log("Lista de transações!");
+
+  const { data, error } = await supabase
+    .from("banco_transacoes")
+    .select("*")
+    .eq("id", id);
+
+  if (error) {
+    console.log(error);
+  }
+}
+
+// menu para o usuário escolher as opções
+async function menu() {
+  let opcao = "";
+
+  while (opcao !== "0") {
+    console.log("===== Menu =====");
+    console.log("1 - cadastrar cliente");
+    console.log("2 - listar cliente");
+    console.log("3 - buscar cliente");
+    console.log("4 - deletar cliente");
+    console.log("5 - cadastrar conta");
+    console.log("6 - listar conta");
+    console.log("7 - registrar transação");
+    console.log("8 - listar transacoes");
+    console.log("0 - sair");
+
+    opcao = prompt("Digite uma opcao: ");
+
+    switch (opcao) {
+      case "1":
+        await cadastrarCliente();
+        break;
+      case "2":
+        let usuario = await cadastrarCliente();
+        if (usuario) {
+          console.log(`Bem vindo ${usuario.nome}`);
+          if (usuario.tipo == "cliente") {
+            c1onsole.log("===== Menu =====");
+            console.log("1 - listar clientes");
+            console.log("0 - sair");
+
+            let seCliente = prompt("Digite uma opcao: ");
+            if (seCliente !== "0") {
+              switch (seCliente) {
+                case "1":
+                  await listarClientes();
+                  break;
+                default:
+                  console.log("Opcao invalida.");
+              }
+            }
+          }
+        }
+      case "3":
+        buscarClientes();
+        break;
+      case "4":
+        deletarCliente();
+        break;
+      case "5":
+        cadastrarConta();
+        break;
+      case "6":
+        listarContas();
+        break;
+      case "7":
+        registrarTransacao();
+        break;
+      case "8":
+        listarTransacoes();
+        break;
+      case "0":
+        console.log("Saindo...");
+        break;
+      default:
+        console.log("Opcao invalida. Tente novamente.");
+    }
+  }
+}
+menu();
