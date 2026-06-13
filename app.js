@@ -26,7 +26,9 @@ async function cadastrarCliente() {
   console.log("Cadastro de clientes!");
   let nome = prompt(" Digite seu nome: ");
   let cpf = prompt(" Digite seu CPF: ");
+  let email = prompt(" Digite o email: ")
   let telefone = prompt(" Digite seu número de telefone: ");
+  let dataCadastro = prompt(" Data de cadastro: ")
   let endereco = prompt(" Digite seu endereço: ");
   let senha = prompt(" Digite sua senha: ");
 
