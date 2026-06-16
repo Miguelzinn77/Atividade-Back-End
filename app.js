@@ -218,7 +218,7 @@ async function menu() {
         await cadastrarCliente();
         break;
       case "2":
-        let usuario = await cadastrarCliente();
+        let usuario = await listarCliente();
         if (usuario) {
           console.log(`Bem vindo ${usuario.nome}`);
           if (usuario.tipo == "cliente") {
