@@ -13,9 +13,12 @@
 // consultar relacionamentos entre tabelas
 
 const prompt = require("prompt-sync")();
+const express = require("express");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const app = express(); // porta das rotas
+app.use(express.json());
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -26,9 +29,9 @@ async function cadastrarCliente() {
   console.log("Cadastro de clientes!");
   let nome = prompt(" Digite seu nome: ");
   let cpf = prompt(" Digite seu CPF: ");
-  let email = prompt(" Digite o email: ")
+  let email = prompt(" Digite o email: ");
   let telefone = prompt(" Digite seu número de telefone: ");
-  let dataCadastro = prompt(" Data de cadastro: ")
+  let dataCadastro = prompt(" Data de cadastro: ");
   let endereco = prompt(" Digite seu endereço: ");
   let senha = prompt(" Digite sua senha: ");
 
@@ -97,6 +100,23 @@ async function buscarClientes(id) {
 }
 // buscarClientes();
 
+// atualizar o cliente no banco cliente
+app.put("/atualizarcliente/:id", async (req, res) => {
+  const id = req.params.id;
+  const atualizar = req.body;
+  const { data, error } = await supabase
+    .from("banco_clientes")
+    .update(atualizar)
+    .eq("id", id);
+  if (error) {
+    console.log(error);
+    return;
+  }
+  console.log(data);
+  res.send(data);
+});
+
+// DELETAR
 async function deletarCliente(id) {
   console.log("Deletar cliente!");
   let nome = prompt(" Digite seu nome: ");
@@ -123,20 +143,22 @@ async function deletarCliente(id) {
 }
 // deletarCliente();
 
+
+// CADASTRAR CONTA
 async function cadastrarConta() {
   console.log("Cadastro de contas!");
-  let numeroDaConta = prompt("Digite o número da conta:");
+  let numero_da_conta = prompt("Digite o número da conta:");
   let agencia = prompt(" Digite o número da agência: ");
-  let tipoDaConta = prompt(" Digite o tipo da conta: ");
-  let dataAbertura = prompt(" Digite a data de abertura: ");
-  let saldoInicial = prompt(" Digite o saldo inicial: ");
+  let tipo_da_conta = prompt(" Digite o tipo da conta: ");
+  let data_de_abertura = prompt(" Digite a data de abertura: ");
+  let saldo_inicial = prompt(" Digite o saldo inicial: ");
 
   let cadastrarConta = {
-    numero_da_conta: numeroDaConta,
+    numero_da_conta: numero_da_conta,
     agencia: agencia,
-    tipoDaConta: tipoDaConta,
-    dataAbertura: dataAbertura,
-    saldoInicial: saldoInicial,
+    tipo_da_conta: tipo_da_conta,
+    data_de_abertura: data_de_abertura,
+    saldo_inicial: saldo_inicial,
   };
 
   const { data, error } = await supabase
@@ -144,30 +166,39 @@ async function cadastrarConta() {
     .insert(cadastrarConta)
     .select();
 
-  console.log(error);
-  console.log(data);
+  if (error) {
+    console.log("Erro ao cadastrar conta:", error);
+    return;
+  }
+  console.log("Conta cadastrada com sucesso:", data);
+  return data;
+  res.send(data);
 }
 // cadastrarConta();
 
+
+//L LISTAR
 async function listarContas() {
   console.log("Lista de contas!");
   const { data, error } = await supabase
     .from("banco_contas") // lista do banco contas
-    .select("agência, tipo_da_conta")
-    .eq("id", id);
+    .select("agencia, tipo_da_conta, saldo_inicial");
 
+  if (!data || data.length === 0) {
+    console.log("Nenhuma conta encontrada.");
+    return;
+  }
   data.forEach((dados) => {
     console.log(
-      `agência: ${dados.agencia}, tipo da conta: ${dados.tipoDaConta}, saldo: ${dados.saldoInicial}`,
+      `agência: ${dados.agencia}, tipo da conta: ${dados.tipo_da_conta}, saldo: ${dados.saldo_inicial}`,
     );
   });
-  if (error) {
-    console.log(error);
-  }
   console.log(data);
 }
 // listarContas();
 
+
+// TRANSAÇÃO
 async function registrarTransacao() {
   console.log("Registrar transação!");
 
@@ -182,6 +213,8 @@ async function registrarTransacao() {
 }
 // registrarTransacao();
 
+
+// LISTAR TRANSAÇÃO
 async function listarTransacoes() {
   console.log("Lista de transações!");
 
@@ -218,7 +251,7 @@ async function menu() {
         await cadastrarCliente();
         break;
       case "2":
-        let usuario = await cadastrarCliente();
+        let usuario = await listarCliente();
         if (usuario) {
           console.log(`Bem vindo ${usuario.nome}`);
           if (usuario.tipo == "cliente") {
