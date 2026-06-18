@@ -3,6 +3,8 @@
 // npm install prompt-sync
 // npm install @supabase/supabase-js
 // npm install bcrypt - para criptografar as senhas
+// npm install cors
+// npm install jsonwebtoken
 
 // REQUISITOS DA ATIVIDADE BACK-END
 // cadastrar dados
@@ -19,6 +21,11 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const app = express(); // porta das rotas
 app.use(express.json());
+
+const jwt = require("jsonwebtoken"); // jwt
+const cors = require("cors"); // cors
+app.use(cors()); // cors
+const JWT_SENHA = process.env.JWT_SENHA;
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -87,8 +94,8 @@ async function buscarClientes(id) {
   const { data, error } = await supabase
     .from("banco_clientes") // busca no banco clientes
     .update(buscarClientes)
-    .eq("id", id)
-    .select();
+    .select("*")
+    .eq("id", id);
   if (error) {
     console.log(error);
   }
@@ -143,7 +150,6 @@ async function deletarCliente(id) {
 }
 // deletarCliente();
 
-
 // CADASTRAR CONTA
 async function cadastrarConta() {
   console.log("Cadastro de contas!");
@@ -176,7 +182,6 @@ async function cadastrarConta() {
 }
 // cadastrarConta();
 
-
 //L LISTAR
 async function listarContas() {
   console.log("Lista de contas!");
@@ -197,35 +202,46 @@ async function listarContas() {
 }
 // listarContas();
 
-
 // TRANSAÇÃO
 async function registrarTransacao() {
   console.log("Registrar transação!");
 
   const { data, error } = await supabase
-    .from("banco_transacoes")
-    .select("tipo_da_transacao, valor_da_transacao")
-    .eq("id", id);
+    .from("banco_transacoes") // lista do banco contas
+    .insert("tipo_da_transacao, valor");
 
-  if (error) {
-    console.log(error);
+  if (!data || data.length === 0) {
+    console.log("Nenhuma transacao encontrada.");
+    return;
   }
+  data.forEach((dados) => {
+    console.log(
+      `tipo da transacao: ${dados.tipo_da_transacao}, saldo: ${dados.valor}`,
+    );
+  });
 }
 // registrarTransacao();
-
 
 // LISTAR TRANSAÇÃO
 async function listarTransacoes() {
   console.log("Lista de transações!");
 
   const { data, error } = await supabase
-    .from("banco_transacoes")
-    .select("*")
+    .from("banco_transacoes") // lista do banco contas
+    .select("tipo_da_transacao, valor")
     .eq("id", id);
 
-  if (error) {
-    console.log(error);
+  if (!data || data.length === 0) {
+    console.log("Nenhuma transacao encontrada.");
+    return;
   }
+  data.forEach((dados) => {
+    console.log(
+      `tipo da transacao: ${dados.tipo_da_transacao}, saldo: ${dados.valor}`,
+    );
+  });
+  console.log(data);
+  console.log(error);
 }
 
 // menu para o usuário escolher as opções
@@ -281,13 +297,17 @@ async function menu() {
         cadastrarConta();
         break;
       case "6":
-        listarContas();
+        let conta = await listarContas();
+        if (conta) {
+          console.log(`Bem vindo ${conta.tipo_da_conta}`);
+        }
         break;
       case "7":
         registrarTransacao();
         break;
       case "8":
-        listarTransacoes();
+        let listaTransacao = await registrarTransacao();
+        // listarTransacoes();
         break;
       case "0":
         console.log("Saindo...");
@@ -298,3 +318,50 @@ async function menu() {
   }
 }
 menu();
+
+
+// JWT JSON WEB TOKEN 
+app.post("/login", async (req, res) => {
+  const cpf = req.body.cpf;
+  const senha = req.body.senha;
+
+  const { data, error } = await supabase
+    .from("biblioteca_usuario")
+    .select("*")
+    .eq("cpf", cpf);
+
+  if (error) {
+    return res.send.status(401).JSON();
+  }
+  if (data.length <= 0) {
+    return json({ erro: `cpf nao encontrado` });
+  }
+  const usuario = data[0];
+  const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+  if (senhaCorreta == false) {
+  }
+  const token = jwt.sign(
+    {
+      id: usuario.id,
+      nome: usuario.nome,
+      tipo: usuario.tipo,
+    },
+    JWT_SENHA,
+    {
+      expiresIn: "1h",
+    },
+  );
+  return res.json({
+    mensagem: "Login realizado com sucesso",
+    token: "token",
+    usuario: {
+      id: usuario.id,
+      nome: usuario.nome,
+      tipo: usuario.tipo,
+    },
+  });
+});
+
+app.listen(3000, () => {
+  console.log("acesse a pagina em https://localhost:3000");
+});
