@@ -25,7 +25,7 @@ app.use(express.json());
 const jwt = require("jsonwebtoken"); // jwt
 const cors = require("cors"); // cors
 app.use(cors()); // cors
-const JWT_SENHA = process.env.JWT_SENHA;
+const JWT_SENHA = process.env.JWT_SENHA; // vai na função de login para gerar o token e na função autenticarToken para verificar o token lá em baixo.
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -271,7 +271,7 @@ async function menu() {
         if (usuario) {
           console.log(`Bem vindo ${usuario.nome}`);
           if (usuario.tipo == "cliente") {
-            c1onsole.log("===== Menu =====");
+            console.log("===== Menu =====");
             console.log("1 - listar clientes");
             console.log("0 - sair");
 
@@ -321,7 +321,7 @@ menu();
 
 
 // JWT JSON WEB TOKEN 
-app.post("/login", async (req, res) => {
+app.post("/login", autenticarToken, async (req, res) => {
   const cpf = req.body.cpf;
   const senha = req.body.senha;
 
@@ -331,14 +331,15 @@ app.post("/login", async (req, res) => {
     .eq("cpf", cpf);
 
   if (error) {
-    return res.send.status(401).JSON();
+    return res.status(401).json();
   }
   if (data.length <= 0) {
-    return json({ erro: `cpf nao encontrado` });
+    return res.json({ erro: `cpf nao encontrado` });
   }
   const usuario = data[0];
   const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
   if (senhaCorreta == false) {
+    return res.status(401).json({ erro: `senha incorreta` });
   }
   const token = jwt.sign(
     {
@@ -361,6 +362,28 @@ app.post("/login", async (req, res) => {
     },
   });
 });
+
+// função autenticar o token para acessar as rotas protegidas
+function autenticarToken(req, res, next){
+    const authHeader = req.headers.authorization
+    if(!authHeader){
+        return res.json({
+            erro:'Token não enviado'
+        })
+    }
+    const token = authHeader.split(' ')[1]
+    try{
+        const usuario = jwt.verify(token,JWT_SENHA)
+        req.usuario = usuario
+        console.log(usuario)
+        next()
+    }catch{
+        return res.json({
+            erro:'Token inválido'
+        })
+    }
+}
+
 
 app.listen(3000, () => {
   console.log("acesse a pagina em https://localhost:3000");
