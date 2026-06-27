@@ -8,7 +8,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Login from './pages/Login'
 import Cliente from './pages/Cliente'
 import Funcionario from './pages/Funcionario'
-import Rota from './components/Rotas'
+import Rota from './components/Rotas' // rotas
 
 function App() {
   return (

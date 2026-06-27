@@ -8,7 +8,6 @@ const Cliente = () => {
     navigate('/login')
 
   }
-
   return (
     <>
     <h1>Página do cliente</h1>
