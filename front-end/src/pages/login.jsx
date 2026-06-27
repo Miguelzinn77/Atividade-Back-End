@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [cpf, setCpf] = useState("");
-  const [senha, setSenha] = useState("");
+  const [email, setEmail] = useState("");
 
   const navigate = useNavigate();
 
@@ -12,7 +12,7 @@ const Login = () => {
     e.preventDefault();
     let usuario = {
       cpf: cpf,
-      senha: senha,
+      email: email,
     };
 
     const resposta = await fetch("http://localhost:3000/login", {
@@ -65,17 +65,17 @@ const Login = () => {
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="senha" className="form-label">
-                Senha
+              <label htmlFor="email" className="form-label">
+                Email
               </label>
               <input
                 onChange={(e) => {
-                  setSenha(e.target.value);
+                  setEmail(e.target.value);
                 }}
-                type="password"
+                type="email"
                 className="form-control"
-                id="senha"
-                name="senha"
+                id="email"
+                name="email"
               />
             </div>
 
